@@ -197,7 +197,7 @@ If no target found, return targets as [].`;
 
 async function queryHF(token, dataUrl) {
   const resp = await fetch(
-    "https://api-inference.huggingface.co/models/Qwen/Qwen2-VL-7B-Instruct/v1/chat/completions",
+    "https://api-inference.huggingface.co/v1/chat/completions",
     {
       method: "POST",
       headers: {
