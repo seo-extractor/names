@@ -34,7 +34,11 @@
     .btn-copy.ok { background: #16a34a; }
     .btn-clear { background: #334155; color: #f1f5f9; }
     .log { font-size: 12px; color: #64748b; margin-top: 10px; white-space: pre-wrap; line-height: 1.6; }
-    .result-box { background: #0f172a; border: 1px solid #334155; border-radius: 8px; padding: 14px; font-size: 14px; white-space: pre-wrap; min-height: 120px; line-height: 1.7; color: #e2e8f0; margin-top: 12px; font-family: monospace; }
+    .result-box { background: #0f172a; border: 1px solid #334155; border-radius: 8px; padding: 14px; font-size: 14px; min-height: 120px; line-height: 1.7; color: #e2e8f0; margin-top: 12px; }
+    .target-header { font-size: 15px; font-weight: 700; color: #f59e0b; letter-spacing: .03em; margin-bottom: 8px; padding-bottom: 6px; border-bottom: 1px solid #334155; }
+    .name-list { list-style: none; padding: 0; margin: 0 0 16px; }
+    .name-list li { padding: 4px 0; color: #e2e8f0; font-family: monospace; font-size: 14px; border-bottom: 1px solid #1e293b; }
+    .name-list li::before { content: "• "; color: #6366f1; }
     .badge { display: inline-block; background: #1e3a5f; color: #60a5fa; font-size: 11px; padding: 2px 8px; border-radius: 20px; margin-left: 8px; vertical-align: middle; }
     .progress { height: 4px; background: #334155; border-radius: 4px; margin-top: 12px; overflow: hidden; }
     .progress-bar { height: 100%; background: #6366f1; transition: width .3s; }
@@ -80,7 +84,7 @@
   <!-- Output -->
   <div class="card" id="outputCard" style="display:none">
     <label>Result</label>
-    <div class="result-box" id="output"></div>
+    <div id="output"></div>
   </div>
 </div>
 
@@ -251,7 +255,13 @@ runBtn.addEventListener("click", async () => {
       logEl.textContent = logs.join("\n");
 
       const dataUrl = await resizeImage(f);
-      if (i > 0) await new Promise(r => setTimeout(r, 2000)); // respect rate limit
+      if (i > 0) {
+        for (let s = 30; s > 0; s--) {
+          logs[logs.length - 1] = `   ⏳ Waiting ${s}s before next image…`;
+          logEl.textContent = logs.join("\n");
+          await new Promise(r => setTimeout(r, 1000));
+        }
+      }
       const raw = await queryGitHub(token, dataUrl);
 
       const cleaned = raw.replace(/```json|```/g, "").trim();
@@ -281,16 +291,32 @@ runBtn.addEventListener("click", async () => {
     a.type.localeCompare(b.type) || a.num - b.num
   );
 
-  let output;
-  if (!targets.length) {
-    output = `Target ? Participants\n${uniqueNames.join("\n")}`;
-  } else {
-    output = targets
-      .map(t => `${t.type} ${t.num} Participants\n${uniqueNames.join("\n")}`)
-      .join("\n\n");
-  }
+  // Render styled output
+  function renderOutput(targets, uniqueNames) {
+    const container = document.getElementById("output");
+    container.innerHTML = "";
+    container.className = "result-box";
 
-  outputEl.textContent = output;
+    const groups = targets.length
+      ? targets.map(t => ({ header: `⚔️ ${t.type} ${t.num} Participants`, names: uniqueNames }))
+      : [{ header: "⚔️ Target ? Participants", names: uniqueNames }];
+
+    groups.forEach(g => {
+      const h = document.createElement("div");
+      h.className = "target-header";
+      h.textContent = g.header;
+      container.appendChild(h);
+
+      const ul = document.createElement("ul");
+      ul.className = "name-list";
+      g.names.forEach((n, i) => {
+        const li = document.createElement("li");
+        li.textContent = `${i + 1}. ${n}`;
+        ul.appendChild(li);
+      });
+      container.appendChild(ul);
+    });
+  }
   outputCard.style.display = "block";
   logs.push(`\n✅ Done — ${uniqueNames.length} unique SEO participant(s) found.`);
   logEl.textContent = logs.join("\n");
@@ -301,7 +327,10 @@ runBtn.addEventListener("click", async () => {
 });
 
 copyBtn.addEventListener("click", () => {
-  const text = outputEl.textContent.trim();
+  const container = document.getElementById("output");
+  const header = container.querySelector(".target-header")?.textContent || "";
+  const names = [...container.querySelectorAll(".name-list li")].map(li => li.textContent);
+  const text = [header, ...names].join("\n").trim();
   if (!text) return;
   navigator.clipboard.writeText(text).then(() => {
     copyBtn.textContent = "Copied!";
