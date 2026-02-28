@@ -106,6 +106,7 @@ let selectedFiles = [];
 const BUILT_IN_TOKEN = "__HF_TOKEN__";
 const hasBuiltInToken = BUILT_IN_TOKEN && !BUILT_IN_TOKEN.startsWith("__");
 
+
 if (hasBuiltInToken) {
   // Hide the token input card entirely — users don't need to enter anything
   document.getElementById("keyCard").style.display = "none";
@@ -195,32 +196,29 @@ Format:
 
 If no target found, return targets as [].`;
 
-async function queryHF(token, dataUrl) {
-  const resp = await fetch(
-    "https://api-inference.huggingface.co/v1/chat/completions",
-    {
-      method: "POST",
-      headers: {
-        "Authorization": `Bearer ${token}`,
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        model: "Qwen/Qwen2-VL-7B-Instruct",
-        max_tokens: 512,
-        messages: [{
-          role: "user",
-          content: [
-            { type: "image_url", image_url: { url: dataUrl } },
-            { type: "text", text: PROMPT }
-          ]
-        }]
-      })
-    }
-  );
+async function queryMistral(token, dataUrl) {
+  const resp = await fetch("https://api.mistral.ai/v1/chat/completions", {
+    method: "POST",
+    headers: {
+      "Authorization": `Bearer ${token}`,
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      model: "pixtral-12b-2409",
+      max_tokens: 512,
+      messages: [{
+        role: "user",
+        content: [
+          { type: "image_url", image_url: { url: dataUrl } },
+          { type: "text", text: PROMPT }
+        ]
+      }]
+    })
+  });
 
   if (!resp.ok) {
     const err = await resp.json().catch(() => ({}));
-    throw new Error(err?.error?.message || err?.error || `HTTP ${resp.status}`);
+    throw new Error(err?.message || err?.error?.message || `HTTP ${resp.status}`);
   }
 
   const data = await resp.json();
@@ -253,7 +251,7 @@ runBtn.addEventListener("click", async () => {
       logEl.textContent = logs.join("\n");
 
       const dataUrl = await resizeImage(f);
-      const raw = await queryHF(token, dataUrl);
+      const raw = await queryMistral(token, dataUrl);
 
       const cleaned = raw.replace(/```json|```/g, "").trim();
       // Extract JSON object from response even if model adds extra text
