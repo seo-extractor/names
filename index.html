@@ -251,6 +251,7 @@ runBtn.addEventListener("click", async () => {
       logEl.textContent = logs.join("\n");
 
       const dataUrl = await resizeImage(f);
+      if (i > 0) await new Promise(r => setTimeout(r, 2000)); // respect rate limit
       const raw = await queryMistral(token, dataUrl);
 
       const cleaned = raw.replace(/```json|```/g, "").trim();
