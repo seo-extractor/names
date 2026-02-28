@@ -196,15 +196,15 @@ Format:
 
 If no target found, return targets as [].`;
 
-async function queryMistral(token, dataUrl) {
-  const resp = await fetch("https://api.mistral.ai/v1/chat/completions", {
+async function queryGitHub(token, dataUrl) {
+  const resp = await fetch("https://models.inference.ai.azure.com/chat/completions", {
     method: "POST",
     headers: {
       "Authorization": `Bearer ${token}`,
       "Content-Type": "application/json"
     },
     body: JSON.stringify({
-      model: "pixtral-12b-2409",
+      model: "gpt-4o-mini",
       max_tokens: 512,
       messages: [{
         role: "user",
@@ -218,7 +218,7 @@ async function queryMistral(token, dataUrl) {
 
   if (!resp.ok) {
     const err = await resp.json().catch(() => ({}));
-    throw new Error(err?.message || err?.error?.message || `HTTP ${resp.status}`);
+    throw new Error(err?.error?.message || `HTTP ${resp.status}`);
   }
 
   const data = await resp.json();
@@ -252,7 +252,7 @@ runBtn.addEventListener("click", async () => {
 
       const dataUrl = await resizeImage(f);
       if (i > 0) await new Promise(r => setTimeout(r, 2000)); // respect rate limit
-      const raw = await queryMistral(token, dataUrl);
+      const raw = await queryGitHub(token, dataUrl);
 
       const cleaned = raw.replace(/```json|```/g, "").trim();
       // Extract JSON object from response even if model adds extra text
