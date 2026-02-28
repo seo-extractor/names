@@ -18,30 +18,32 @@
     .hint a { color: #818cf8; }
     .steps { font-size: 12px; color: #64748b; margin-top: 8px; line-height: 1.8; }
     .steps b { color: #94a3b8; }
+    .guide-grid { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 4px; }
+    .guide-item { flex: 1; min-width: 160px; background: #0f172a; border: 1px solid #334155; border-radius: 10px; padding: 12px; text-align: center; }
+    .guide-icon { font-size: 2rem; margin-bottom: 6px; }
+    .guide-title { font-weight: 700; color: #f59e0b; margin-bottom: 4px; font-size: 14px; }
+    .guide-desc { font-size: 12px; color: #94a3b8; }
     .upload-area { border: 2px dashed #334155; border-radius: 10px; padding: 32px; text-align: center; cursor: pointer; transition: border-color .2s; }
     .upload-area:hover, .upload-area.drag { border-color: #6366f1; }
-    .upload-area input { display: none; }
-    .upload-icon { font-size: 2rem; margin-bottom: 8px; }
-    .upload-text { color: #94a3b8; font-size: 14px; }
     .previews { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
     .previews img { height: 72px; border-radius: 6px; border: 1px solid #334155; object-fit: cover; }
     .btn-row { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
-    button { padding: 10px 18px; border: none; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; transition: opacity .15s; }
+    button { padding: 10px 18px; border: none; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all .15s; }
     button:disabled { opacity: .45; cursor: not-allowed; }
     .btn-primary { background: #6366f1; color: #fff; }
     .btn-primary:hover:not(:disabled) { background: #4f46e5; }
     .btn-copy { background: #334155; color: #f1f5f9; }
-    .btn-copy.ok { background: #16a34a; }
+    .btn-copy.ok { background: #16a34a; color: #fff; }
     .btn-clear { background: #334155; color: #f1f5f9; }
     .log { font-size: 12px; color: #64748b; margin-top: 10px; white-space: pre-wrap; line-height: 1.6; }
-    .result-box { background: #0f172a; border: 1px solid #334155; border-radius: 8px; padding: 14px; font-size: 14px; min-height: 120px; line-height: 1.7; color: #e2e8f0; margin-top: 12px; }
-    .target-header { font-size: 15px; font-weight: 700; color: #f59e0b; letter-spacing: .03em; margin-bottom: 8px; padding-bottom: 6px; border-bottom: 1px solid #334155; }
-    .name-list { list-style: none; padding: 0; margin: 0 0 16px; }
-    .name-list li { padding: 4px 0; color: #e2e8f0; font-family: monospace; font-size: 14px; border-bottom: 1px solid #1e293b; }
-    .name-list li::before { content: "• "; color: #6366f1; }
-    .badge { display: inline-block; background: #1e3a5f; color: #60a5fa; font-size: 11px; padding: 2px 8px; border-radius: 20px; margin-left: 8px; vertical-align: middle; }
-    .progress { height: 4px; background: #334155; border-radius: 4px; margin-top: 12px; overflow: hidden; }
-    .progress-bar { height: 100%; background: #6366f1; transition: width .3s; }
+    .progress { height: 4px; background: #334155; border-radius: 4px; margin-top: 12px; overflow: hidden; display: none; }
+    .progress-bar { height: 100%; background: #6366f1; transition: width .3s; width: 0%; }
+    .result-box { background: #0f172a; border: 1px solid #334155; border-radius: 8px; padding: 14px; min-height: 80px; margin-top: 12px; }
+    .target-header { font-size: 15px; font-weight: 700; color: #f59e0b; letter-spacing: .03em; margin-bottom: 4px; padding-bottom: 8px; border-bottom: 1px solid #334155; }
+    .participant-count { font-size: 12px; color: #64748b; margin: 6px 0 10px; }
+    .name-list { list-style: none; padding: 0; margin: 0; }
+    .name-list li { padding: 5px 0; color: #e2e8f0; font-size: 14px; border-bottom: 1px solid #1e293b; display: flex; align-items: center; gap: 8px; }
+    .name-num { color: #6366f1; font-size: 12px; min-width: 24px; }
   </style>
 </head>
 <body>
@@ -49,32 +51,32 @@
   <h1>⚔️ SEO Fortress/Stronghold Participants Extractor</h1>
   <p class="sub">Upload Battle Details or Battle Record screenshots → get participant list instantly.</p>
 
-  <!-- API Key -->
-  <div class="card" id="keyCard">
-    <label>Hugging Face API Token <span class="badge">Free</span></label>
-    <input type="password" id="apiKey" placeholder="hf_…" autocomplete="off" />
-    <div class="steps">
-      <b>Get your free token (2 minutes):</b><br>
-      1. Go to <a href="https://huggingface.co/join" target="_blank">huggingface.co/join</a> → create free account<br>
-      2. Click your avatar → <a href="https://huggingface.co/settings/tokens" target="_blank">Settings → Access Tokens</a><br>
-      3. Click <b>New token</b> → Role: <b>Read</b> → Create → Copy it here
+  <!-- What to upload guide -->
+  <div class="card">
+    <label>What to Upload</label>
+    <div class="guide-grid">
+      <div class="guide-item">
+        <div class="guide-icon">📋</div>
+        <div class="guide-title">Battle Details</div>
+        <div class="guide-desc">List of [SEO] players with troop counts. Scroll and screenshot all pages.</div>
+      </div>
+      <div class="guide-item">
+        <div class="guide-icon">📜</div>
+        <div class="guide-title">Battle Record</div>
+        <div class="guide-desc">Event log showing who dispatched reinforcements and launched attacks.</div>
+      </div>
     </div>
   </div>
 
-  <!-- Guide -->
-  <div class="card">
-    <label>What to upload</label>
-    <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:4px;">
-      <div style="flex:1; min-width:180px; background:#0f172a; border:1px solid #334155; border-radius:10px; padding:12px; text-align:center;">
-        <div style="font-size:2rem;">📋</div>
-        <div style="font-weight:700; color:#f59e0b; margin:6px 0 4px;">Battle Details</div>
-        <div style="font-size:12px; color:#94a3b8;">List of [SEO] players with troop counts. Scroll and screenshot all pages.</div>
-      </div>
-      <div style="flex:1; min-width:180px; background:#0f172a; border:1px solid #334155; border-radius:10px; padding:12px; text-align:center;">
-        <div style="font-size:2rem;">📜</div>
-        <div style="font-weight:700; color:#f59e0b; margin:6px 0 4px;">Battle Record</div>
-        <div style="font-size:12px; color:#94a3b8;">Event log showing who dispatched reinforcements and launched attacks.</div>
-      </div>
+  <!-- Token input (hidden when token injected by CI) -->
+  <div class="card" id="keyCard">
+    <label>GitHub Token <span style="background:#1e3a5f;color:#60a5fa;font-size:11px;padding:2px 8px;border-radius:20px;margin-left:8px;">Free</span></label>
+    <input type="password" id="apiKey" placeholder="ghp_…" autocomplete="off" />
+    <div class="steps">
+      <b>Get your free token:</b><br>
+      1. Go to <a href="https://github.com/settings/tokens" target="_blank">github.com/settings/tokens</a><br>
+      2. Generate new token (classic) → no scopes needed → Generate<br>
+      3. Also visit <a href="https://github.com/marketplace/models" target="_blank">github.com/marketplace/models</a> to activate access
     </div>
   </div>
 
@@ -82,61 +84,57 @@
   <div class="card">
     <label>Screenshots</label>
     <div class="upload-area" id="dropZone">
-      <input type="file" id="fileInput" accept="image/*" multiple />
-      <div class="upload-icon">🖼️</div>
-      <div class="upload-text">Click to upload or drag & drop<br><small>Battle Details + Battle Record screens</small></div>
+      <input type="file" id="fileInput" accept="image/*" multiple style="display:none" />
+      <div style="font-size:2rem;margin-bottom:8px;">🖼️</div>
+      <div style="color:#94a3b8;font-size:14px;">Click to upload or drag & drop<br><small>Battle Details + Battle Record screens</small></div>
     </div>
     <div class="previews" id="previews"></div>
+
     <div class="btn-row">
       <button class="btn-primary" id="runBtn" disabled>Extract Names</button>
       <button class="btn-copy" id="copyBtn" disabled>Copy</button>
       <button class="btn-clear" id="clearBtn">Clear</button>
     </div>
-    <div class="progress" id="progressWrap" style="display:none">
-      <div class="progress-bar" id="progressBar" style="width:0%"></div>
+
+    <div class="progress" id="progressWrap">
+      <div class="progress-bar" id="progressBar"></div>
     </div>
-    <div class="log" id="log"></div>
+    <div class="log" id="logEl"></div>
   </div>
 
-  <!-- Output -->
+  <!-- Result -->
   <div class="card" id="outputCard" style="display:none">
     <label>Result</label>
-    <div id="output"></div>
+    <div class="result-box" id="outputEl"></div>
   </div>
 </div>
 
 <script>
-const $ = id => document.getElementById(id);
-const apiKeyEl = $("apiKey");
-const fileInput = $("fileInput");
-const dropZone = $("dropZone");
-const previewsEl = $("previews");
-const runBtn = $("runBtn");
-const copyBtn = $("copyBtn");
-const clearBtn = $("clearBtn");
-const logEl = $("log");
-const outputEl = $("output");
-const outputCard = $("outputCard");
-const progressWrap = $("progressWrap");
-const progressBar = $("progressBar");
-
-let selectedFiles = [];
-
-// Restore saved key
-// Token injected by GitHub Actions at build time
+// ─── Token (injected by GitHub Actions at build time) ───────────────────────
 const BUILT_IN_TOKEN = "__HF_TOKEN__";
 const hasBuiltInToken = BUILT_IN_TOKEN && !BUILT_IN_TOKEN.startsWith("__");
 
+const keyCard    = document.getElementById("keyCard");
+const apiKeyEl   = document.getElementById("apiKey");
+const fileInput  = document.getElementById("fileInput");
+const dropZone   = document.getElementById("dropZone");
+const previewsEl = document.getElementById("previews");
+const runBtn     = document.getElementById("runBtn");
+const copyBtn    = document.getElementById("copyBtn");
+const clearBtn   = document.getElementById("clearBtn");
+const logEl      = document.getElementById("logEl");
+const outputEl   = document.getElementById("outputEl");
+const outputCard = document.getElementById("outputCard");
+const progressWrap = document.getElementById("progressWrap");
+const progressBar  = document.getElementById("progressBar");
 
 if (hasBuiltInToken) {
-  // Hide the token input card entirely — users don't need to enter anything
-  document.getElementById("keyCard").style.display = "none";
+  keyCard.style.display = "none";
 } else {
-  // Local dev fallback — show input field
-  const savedKey = localStorage.getItem("hf_key");
-  if (savedKey) apiKeyEl.value = savedKey;
+  const saved = localStorage.getItem("gh_token");
+  if (saved) apiKeyEl.value = saved;
   apiKeyEl.addEventListener("input", () => {
-    localStorage.setItem("hf_key", apiKeyEl.value.trim());
+    localStorage.setItem("gh_token", apiKeyEl.value.trim());
     updateRunBtn();
   });
 }
@@ -145,15 +143,25 @@ function getToken() {
   return hasBuiltInToken ? BUILT_IN_TOKEN : apiKeyEl.value.trim();
 }
 
-// Upload / drag-drop
+function updateRunBtn() {
+  runBtn.disabled = !selectedFiles.length || (!hasBuiltInToken && !apiKeyEl.value.trim());
+}
+
+// ─── File handling ───────────────────────────────────────────────────────────
+let selectedFiles = [];
+
 dropZone.addEventListener("click", () => fileInput.click());
 fileInput.addEventListener("change", e => addFiles([...e.target.files]));
 dropZone.addEventListener("dragover", e => { e.preventDefault(); dropZone.classList.add("drag"); });
 dropZone.addEventListener("dragleave", () => dropZone.classList.remove("drag"));
-dropZone.addEventListener("drop", e => { e.preventDefault(); dropZone.classList.remove("drag"); addFiles([...e.dataTransfer.files]); });
+dropZone.addEventListener("drop", e => {
+  e.preventDefault();
+  dropZone.classList.remove("drag");
+  addFiles([...e.dataTransfer.files]);
+});
 
 function addFiles(files) {
-  files.forEach(f => { if (f.type.startsWith("image/")) selectedFiles.push(f); });
+  files.filter(f => f.type.startsWith("image/")).forEach(f => selectedFiles.push(f));
   renderPreviews();
   updateRunBtn();
 }
@@ -167,46 +175,39 @@ function renderPreviews() {
   });
 }
 
-function updateRunBtn() {
-  runBtn.disabled = !selectedFiles.length || (!hasBuiltInToken && !apiKeyEl.value.trim());
-}
-
-function fileToDataURL(file) {
-  return new Promise((res, rej) => {
-    const r = new FileReader();
-    r.onload = () => res(r.result);
-    r.onerror = rej;
-    r.readAsDataURL(file);
-  });
-}
-
-// Resize image to max 1024px to keep HF request size manageable
+// ─── Image resize ────────────────────────────────────────────────────────────
 async function resizeImage(file, maxW = 1024) {
-  const dataUrl = await fileToDataURL(file);
-  return new Promise(res => {
-    const img = new Image();
-    img.onload = () => {
-      const scale = Math.min(1, maxW / img.width);
-      const w = Math.round(img.width * scale);
-      const h = Math.round(img.height * scale);
-      const c = document.createElement("canvas");
-      c.width = w; c.height = h;
-      c.getContext("2d").drawImage(img, 0, 0, w, h);
-      res(c.toDataURL("image/jpeg", 0.92));
+  return new Promise((res, rej) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      const img = new Image();
+      img.onload = () => {
+        const scale = Math.min(1, maxW / img.width);
+        const w = Math.round(img.width * scale);
+        const h = Math.round(img.height * scale);
+        const c = document.createElement("canvas");
+        c.width = w; c.height = h;
+        c.getContext("2d").drawImage(img, 0, 0, w, h);
+        res(c.toDataURL("image/jpeg", 0.92));
+      };
+      img.onerror = rej;
+      img.src = reader.result;
     };
-    img.src = dataUrl;
+    reader.onerror = rej;
+    reader.readAsDataURL(file);
   });
 }
 
+// ─── API call ────────────────────────────────────────────────────────────────
 const PROMPT = `You are extracting participant names from a mobile strategy game screenshot.
 
-Look carefully at ALL text visible in the image. Extract:
+Carefully read ALL text in the image. Extract:
 1. Every player name that appears with a [SEO] clan tag — list WITHOUT the [SEO] prefix
-2. Any Stronghold or Fortress number mentioned (e.g. "Stronghold No. 2" → type: Stronghold, num: 2)
+2. Any Stronghold or Fortress number (e.g. "Stronghold No. 2" → type: Stronghold, num: 2)
 
 Rules:
 - Include names from Battle Details lists AND Battle Record event logs
-- In Battle Record: include [SEO] members who dispatched reinforcements, launched attacks, or are named as defenders
+- In Battle Record: include [SEO] members who dispatched reinforcements, launched attacks, or are defenders
 - Exclude non-SEO players (e.g. [DTH] or other clan tags)
 - Names may be English or Cyrillic — include both
 - Names with spaces are valid (e.g. "Que Pereza", "Flustered Panda", "Король Севера")
@@ -246,6 +247,28 @@ async function queryGitHub(token, dataUrl) {
   return data?.choices?.[0]?.message?.content || "";
 }
 
+// ─── Render result ───────────────────────────────────────────────────────────
+function renderResult(targets, names) {
+  const header = targets.length
+    ? targets.map(t => `⚔️ ${t.type} ${t.num} Participants`).join(" &amp; ")
+    : "⚔️ Target ? Participants";
+
+  const rows = names.map((n, i) =>
+    `<li><span class="name-num">${i + 1}.</span>${n}</li>`
+  ).join("");
+
+  outputEl.innerHTML = `
+    <div class="target-header">${header}</div>
+    <div class="participant-count">${names.length} participant(s)</div>
+    <ul class="name-list">${rows}</ul>
+  `;
+
+  outputCard.style.display = "block";
+  outputCard.scrollIntoView({ behavior: "smooth", block: "start" });
+  copyBtn.disabled = false;
+}
+
+// ─── Extract ─────────────────────────────────────────────────────────────────
 runBtn.addEventListener("click", async () => {
   const token = getToken();
   if (!token || !selectedFiles.length) return;
@@ -253,6 +276,7 @@ runBtn.addEventListener("click", async () => {
   runBtn.disabled = true;
   copyBtn.disabled = true;
   outputCard.style.display = "none";
+  outputEl.innerHTML = "";
   logEl.textContent = "";
   progressWrap.style.display = "block";
   progressBar.style.width = "0%";
@@ -261,30 +285,32 @@ runBtn.addEventListener("click", async () => {
   const allNames = new Set();
   const allTargets = new Map();
 
+  const log = (msg, replace = false) => {
+    if (replace) logs[logs.length - 1] = msg;
+    else logs.push(msg);
+    logEl.textContent = logs.join("\n");
+  };
+
   for (let i = 0; i < selectedFiles.length; i++) {
     const f = selectedFiles[i];
-    logs.push(`📷 Image ${i + 1}/${selectedFiles.length}: ${f.name}`);
-    logEl.textContent = logs.join("\n");
+    log(`📷 Image ${i + 1}/${selectedFiles.length}: ${f.name}`);
     progressBar.style.width = `${Math.round((i / selectedFiles.length) * 100)}%`;
 
-    try {
-      logs.push(`   ⏳ Resizing & sending to Qwen2-VL…`);
-      logEl.textContent = logs.join("\n");
-
-      const dataUrl = await resizeImage(f);
-      if (i > 0) {
-        for (let s = 30; s > 0; s--) {
-          logs[logs.length - 1] = `   ⏳ Waiting ${s}s before next image…`;
-          logEl.textContent = logs.join("\n");
-          await new Promise(r => setTimeout(r, 1000));
-        }
+    // Countdown delay between images
+    if (i > 0) {
+      for (let s = 30; s > 0; s--) {
+        log(`   ⏳ Waiting ${s}s before next image…`, true);
+        await new Promise(r => setTimeout(r, 1000));
       }
+      log(`   ⏳ Sending…`, true);
+    }
+
+    try {
+      const dataUrl = await resizeImage(f);
       const raw = await queryGitHub(token, dataUrl);
 
-      const cleaned = raw.replace(/```json|```/g, "").trim();
-      // Extract JSON object from response even if model adds extra text
-      const jsonMatch = cleaned.match(/\{[\s\S]*\}/);
-      if (!jsonMatch) throw new Error("No JSON found in response");
+      const jsonMatch = raw.replace(/```json|```/g, "").trim().match(/\{[\s\S]*\}/);
+      if (!jsonMatch) throw new Error("No JSON in response");
 
       const parsed = JSON.parse(jsonMatch[0]);
       const names = (parsed.names || []).filter(n => n && n.trim().length >= 2);
@@ -293,12 +319,10 @@ runBtn.addEventListener("click", async () => {
         if (t.type && t.num) allTargets.set(`${t.type}|${t.num}`, t);
       });
 
-      logs[logs.length - 1] = `   ✅ Found ${names.length} name(s): ${names.join(", ")}`;
+      log(`   ✅ Found ${names.length} name(s): ${names.join(", ")}`, i > 0);
     } catch (e) {
-      logs[logs.length - 1] = `   ❌ Error: ${e.message}`;
+      log(`   ❌ Error: ${e.message}`, i > 0);
     }
-
-    logEl.textContent = logs.join("\n");
   }
 
   progressBar.style.width = "100%";
@@ -308,53 +332,23 @@ runBtn.addEventListener("click", async () => {
     a.type.localeCompare(b.type) || a.num - b.num
   );
 
-  // Render styled output
-  function renderOutput(targets, uniqueNames) {
-    const container = document.getElementById("output");
-    if (!container) return;
-    container.innerHTML = "";
-    container.className = "result-box";
+  log(`\n✅ Done — ${uniqueNames.length} unique SEO participant(s) found.`);
 
-    const groups = targets.length
-      ? targets.map(t => ({ header: `⚔️ ${t.type} ${t.num} Participants`, names: uniqueNames }))
-      : [{ header: "⚔️ Target ? Participants", names: uniqueNames }];
-
-    groups.forEach(g => {
-      const h = document.createElement("div");
-      h.className = "target-header";
-      h.textContent = g.header;
-      container.appendChild(h);
-
-      const count = document.createElement("div");
-      count.style.cssText = "font-size:12px;color:#64748b;margin-bottom:8px;";
-      count.textContent = `${g.names.length} participant(s)`;
-      container.appendChild(count);
-
-      const ul = document.createElement("ul");
-      ul.className = "name-list";
-      g.names.forEach((n, i) => {
-        const li = document.createElement("li");
-        li.textContent = `${i + 1}. ${n}`;
-        ul.appendChild(li);
-      });
-      container.appendChild(ul);
-    });
-
-    outputCard.style.display = "block";
+  if (uniqueNames.length > 0) {
+    renderResult(targets, uniqueNames);
   }
-  outputCard.style.display = "block";
-  logs.push(`\n✅ Done — ${uniqueNames.length} unique SEO participant(s) found.`);
-  logEl.textContent = logs.join("\n");
 
-  copyBtn.disabled = false;
   runBtn.disabled = false;
   updateRunBtn();
 });
 
+// ─── Copy ────────────────────────────────────────────────────────────────────
 copyBtn.addEventListener("click", () => {
-  const out = document.getElementById("output");
-  const header = out.querySelector(".target-header")?.textContent || "";
-  const names = [...out.querySelectorAll(".name-list li")].map(li => li.textContent);
+  const header = outputEl.querySelector(".target-header")?.textContent || "";
+  const names = [...outputEl.querySelectorAll(".name-list li")]
+    .map(li => li.querySelector(".name-num") 
+      ? li.textContent.replace(/^\d+\./, "").trim()
+      : li.textContent.trim());
   const text = [header, ...names].join("\n").trim();
   if (!text) return;
   navigator.clipboard.writeText(text).then(() => {
@@ -364,11 +358,12 @@ copyBtn.addEventListener("click", () => {
   });
 });
 
+// ─── Clear ───────────────────────────────────────────────────────────────────
 clearBtn.addEventListener("click", () => {
   selectedFiles = [];
   fileInput.value = "";
   previewsEl.innerHTML = "";
-  outputEl.textContent = "";
+  outputEl.innerHTML = "";
   logEl.textContent = "";
   outputCard.style.display = "none";
   progressWrap.style.display = "none";
@@ -376,6 +371,9 @@ clearBtn.addEventListener("click", () => {
   copyBtn.disabled = true;
   updateRunBtn();
 });
+
+// Initial state
+updateRunBtn();
 </script>
 </body>
 </html>
