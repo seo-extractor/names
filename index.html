@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>SEO Participants Extractor</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: system-ui, -apple-system, sans-serif; background: #0f172a; color: #f1f5f9; min-height: 100vh; padding: 24px 16px; }
+    .wrap { max-width: 680px; margin: 0 auto; }
+    h1 { font-size: 1.4rem; font-weight: 700; margin-bottom: 4px; }
+    .sub { color: #94a3b8; font-size: 13px; margin-bottom: 20px; }
+    .card { background: #1e293b; border: 1px solid #334155; border-radius: 12px; padding: 16px; margin-bottom: 14px; }
+    label { display: block; font-size: 12px; color: #94a3b8; margin-bottom: 6px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; }
+    input[type=password] { width: 100%; padding: 10px 12px; background: #0f172a; border: 1px solid #334155; border-radius: 8px; color: #f1f5f9; font-size: 14px; outline: none; }
+    input[type=password]:focus { border-color: #6366f1; }
+    .hint { font-size: 12px; color: #64748b; margin-top: 6px; }
+    .hint a { color: #818cf8; }
+    .steps { font-size: 12px; color: #64748b; margin-top: 8px; line-height: 1.8; }
+    .steps b { color: #94a3b8; }
+    .upload-area { border: 2px dashed #334155; border-radius: 10px; padding: 32px; text-align: center; cursor: pointer; transition: border-color .2s; }
+    .upload-area:hover, .upload-area.drag { border-color: #6366f1; }
+    .upload-area input { display: none; }
+    .upload-icon { font-size: 2rem; margin-bottom: 8px; }
+    .upload-text { color: #94a3b8; font-size: 14px; }
+    .previews { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+    .previews img { height: 72px; border-radius: 6px; border: 1px solid #334155; object-fit: cover; }
+    .btn-row { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
+    button { padding: 10px 18px; border: none; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; transition: opacity .15s; }
+    button:disabled { opacity: .45; cursor: not-allowed; }
+    .btn-primary { background: #6366f1; color: #fff; }
+    .btn-primary:hover:not(:disabled) { background: #4f46e5; }
+    .btn-copy { background: #334155; color: #f1f5f9; }
+    .btn-copy.ok { background: #16a34a; }
+    .btn-clear { background: #334155; color: #f1f5f9; }
+    .log { font-size: 12px; color: #64748b; margin-top: 10px; white-space: pre-wrap; line-height: 1.6; }
+    .result-box { background: #0f172a; border: 1px solid #334155; border-radius: 8px; padding: 14px; font-size: 14px; white-space: pre-wrap; min-height: 120px; line-height: 1.7; color: #e2e8f0; margin-top: 12px; font-family: monospace; }
+    .badge { display: inline-block; background: #1e3a5f; color: #60a5fa; font-size: 11px; padding: 2px 8px; border-radius: 20px; margin-left: 8px; vertical-align: middle; }
+    .progress { height: 4px; background: #334155; border-radius: 4px; margin-top: 12px; overflow: hidden; }
+    .progress-bar { height: 100%; background: #6366f1; transition: width .3s; }
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <h1>⚔️ SEO Participants Extractor</h1>
+  <p class="sub">Upload Battle Details or Battle Record screenshots → get participant list instantly.</p>
+
+  <!-- API Key -->
+  <div class="card" id="keyCard">
+    <label>Hugging Face API Token <span class="badge">Free</span></label>
+    <input type="password" id="apiKey" placeholder="hf_…" autocomplete="off" />
+    <div class="steps">
+      <b>Get your free token (2 minutes):</b><br>
+      1. Go to <a href="https://huggingface.co/join" target="_blank">huggingface.co/join</a> → create free account<br>
+      2. Click your avatar → <a href="https://huggingface.co/settings/tokens" target="_blank">Settings → Access Tokens</a><br>
+      3. Click <b>New token</b> → Role: <b>Read</b> → Create → Copy it here
+    </div>
+  </div>
+
+  <!-- Upload -->
+  <div class="card">
+    <label>Screenshots</label>
+    <div class="upload-area" id="dropZone">
+      <input type="file" id="fileInput" accept="image/*" multiple />
+      <div class="upload-icon">🖼️</div>
+      <div class="upload-text">Click to upload or drag & drop<br><small>Battle Details + Battle Record screens</small></div>
+    </div>
+    <div class="previews" id="previews"></div>
+    <div class="btn-row">
+      <button class="btn-primary" id="runBtn" disabled>Extract Names</button>
+      <button class="btn-copy" id="copyBtn" disabled>Copy</button>
+      <button class="btn-clear" id="clearBtn">Clear</button>
+    </div>
+    <div class="progress" id="progressWrap" style="display:none">
+      <div class="progress-bar" id="progressBar" style="width:0%"></div>
+    </div>
+    <div class="log" id="log"></div>
+  </div>
+
+  <!-- Output -->
+  <div class="card" id="outputCard" style="display:none">
+    <label>Result</label>
+    <div class="result-box" id="output"></div>
+  </div>
+</div>
+
+<script>
+const $ = id => document.getElementById(id);
+const apiKeyEl = $("apiKey");
+const fileInput = $("fileInput");
+const dropZone = $("dropZone");
+const previewsEl = $("previews");
+const runBtn = $("runBtn");
+const copyBtn = $("copyBtn");
+const clearBtn = $("clearBtn");
+const logEl = $("log");
+const outputEl = $("output");
+const outputCard = $("outputCard");
+const progressWrap = $("progressWrap");
+const progressBar = $("progressBar");
+
+let selectedFiles = [];
+
+// Restore saved key
+// Token injected by GitHub Actions at build time
+const BUILT_IN_TOKEN = "__HF_TOKEN__";
+const hasBuiltInToken = BUILT_IN_TOKEN && !BUILT_IN_TOKEN.startsWith("__");
+
+if (hasBuiltInToken) {
+  // Hide the token input card entirely — users don't need to enter anything
+  document.getElementById("keyCard").style.display = "none";
+} else {
+  // Local dev fallback — show input field
+  const savedKey = localStorage.getItem("hf_key");
+  if (savedKey) apiKeyEl.value = savedKey;
+  apiKeyEl.addEventListener("input", () => {
+    localStorage.setItem("hf_key", apiKeyEl.value.trim());
+    updateRunBtn();
+  });
+}
+
+function getToken() {
+  return hasBuiltInToken ? BUILT_IN_TOKEN : apiKeyEl.value.trim();
+}
+
+// Upload / drag-drop
+dropZone.addEventListener("click", () => fileInput.click());
+fileInput.addEventListener("change", e => addFiles([...e.target.files]));
+dropZone.addEventListener("dragover", e => { e.preventDefault(); dropZone.classList.add("drag"); });
+dropZone.addEventListener("dragleave", () => dropZone.classList.remove("drag"));
+dropZone.addEventListener("drop", e => { e.preventDefault(); dropZone.classList.remove("drag"); addFiles([...e.dataTransfer.files]); });
+
+function addFiles(files) {
+  files.forEach(f => { if (f.type.startsWith("image/")) selectedFiles.push(f); });
+  renderPreviews();
+  updateRunBtn();
+}
+
+function renderPreviews() {
+  previewsEl.innerHTML = "";
+  selectedFiles.forEach(f => {
+    const img = document.createElement("img");
+    img.src = URL.createObjectURL(f);
+    previewsEl.appendChild(img);
+  });
+}
+
+function updateRunBtn() {
+  runBtn.disabled = !selectedFiles.length || (!hasBuiltInToken && !apiKeyEl.value.trim());
+}
+
+function fileToDataURL(file) {
+  return new Promise((res, rej) => {
+    const r = new FileReader();
+    r.onload = () => res(r.result);
+    r.onerror = rej;
+    r.readAsDataURL(file);
+  });
+}
+
+// Resize image to max 1024px to keep HF request size manageable
+async function resizeImage(file, maxW = 1024) {
+  const dataUrl = await fileToDataURL(file);
+  return new Promise(res => {
+    const img = new Image();
+    img.onload = () => {
+      const scale = Math.min(1, maxW / img.width);
+      const w = Math.round(img.width * scale);
+      const h = Math.round(img.height * scale);
+      const c = document.createElement("canvas");
+      c.width = w; c.height = h;
+      c.getContext("2d").drawImage(img, 0, 0, w, h);
+      res(c.toDataURL("image/jpeg", 0.92));
+    };
+    img.src = dataUrl;
+  });
+}
+
+const PROMPT = `You are extracting participant names from a mobile strategy game screenshot.
+
+Look carefully at ALL text visible in the image. Extract:
+1. Every player name that appears with a [SEO] clan tag — list WITHOUT the [SEO] prefix
+2. Any Stronghold or Fortress number mentioned (e.g. "Stronghold No. 2" → type: Stronghold, num: 2)
+
+Rules:
+- Include names from Battle Details lists AND Battle Record event logs
+- In Battle Record: include [SEO] members who dispatched reinforcements, launched attacks, or are named as defenders
+- Exclude non-SEO players (e.g. [DTH] or other clan tags)
+- Names may be English or Cyrillic — include both
+- Names with spaces are valid (e.g. "Que Pereza", "Flustered Panda", "Король Севера")
+- Return ONLY raw JSON, no markdown, no explanation
+
+Format:
+{"names":["Name1","Name2"],"targets":[{"type":"Stronghold","num":2}]}
+
+If no target found, return targets as [].`;
+
+async function queryHF(token, dataUrl) {
+  const resp = await fetch(
+    "https://api-inference.huggingface.co/models/Qwen/Qwen2-VL-7B-Instruct/v1/chat/completions",
+    {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${token}`,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        model: "Qwen/Qwen2-VL-7B-Instruct",
+        max_tokens: 512,
+        messages: [{
+          role: "user",
+          content: [
+            { type: "image_url", image_url: { url: dataUrl } },
+            { type: "text", text: PROMPT }
+          ]
+        }]
+      })
+    }
+  );
+
+  if (!resp.ok) {
+    const err = await resp.json().catch(() => ({}));
+    throw new Error(err?.error?.message || err?.error || `HTTP ${resp.status}`);
+  }
+
+  const data = await resp.json();
+  return data?.choices?.[0]?.message?.content || "";
+}
+
+runBtn.addEventListener("click", async () => {
+  const token = getToken();
+  if (!token || !selectedFiles.length) return;
+
+  runBtn.disabled = true;
+  copyBtn.disabled = true;
+  outputCard.style.display = "none";
+  logEl.textContent = "";
+  progressWrap.style.display = "block";
+  progressBar.style.width = "0%";
+
+  const logs = [];
+  const allNames = new Set();
+  const allTargets = new Map();
+
+  for (let i = 0; i < selectedFiles.length; i++) {
+    const f = selectedFiles[i];
+    logs.push(`📷 Image ${i + 1}/${selectedFiles.length}: ${f.name}`);
+    logEl.textContent = logs.join("\n");
+    progressBar.style.width = `${Math.round((i / selectedFiles.length) * 100)}%`;
+
+    try {
+      logs.push(`   ⏳ Resizing & sending to Qwen2-VL…`);
+      logEl.textContent = logs.join("\n");
+
+      const dataUrl = await resizeImage(f);
+      const raw = await queryHF(token, dataUrl);
+
+      const cleaned = raw.replace(/```json|```/g, "").trim();
+      // Extract JSON object from response even if model adds extra text
+      const jsonMatch = cleaned.match(/\{[\s\S]*\}/);
+      if (!jsonMatch) throw new Error("No JSON found in response");
+
+      const parsed = JSON.parse(jsonMatch[0]);
+      const names = (parsed.names || []).filter(n => n && n.trim().length >= 2);
+      names.forEach(n => allNames.add(n.trim()));
+      (parsed.targets || []).forEach(t => {
+        if (t.type && t.num) allTargets.set(`${t.type}|${t.num}`, t);
+      });
+
+      logs[logs.length - 1] = `   ✅ Found ${names.length} name(s): ${names.join(", ")}`;
+    } catch (e) {
+      logs[logs.length - 1] = `   ❌ Error: ${e.message}`;
+    }
+
+    logEl.textContent = logs.join("\n");
+  }
+
+  progressBar.style.width = "100%";
+
+  const uniqueNames = [...allNames];
+  const targets = [...allTargets.values()].sort((a, b) =>
+    a.type.localeCompare(b.type) || a.num - b.num
+  );
+
+  let output;
+  if (!targets.length) {
+    output = `Target ? Participants\n${uniqueNames.join("\n")}`;
+  } else {
+    output = targets
+      .map(t => `${t.type} ${t.num} Participants\n${uniqueNames.join("\n")}`)
+      .join("\n\n");
+  }
+
+  outputEl.textContent = output;
+  outputCard.style.display = "block";
+  logs.push(`\n✅ Done — ${uniqueNames.length} unique SEO participant(s) found.`);
+  logEl.textContent = logs.join("\n");
+
+  copyBtn.disabled = false;
+  runBtn.disabled = false;
+  updateRunBtn();
+});
+
+copyBtn.addEventListener("click", () => {
+  const text = outputEl.textContent.trim();
+  if (!text) return;
+  navigator.clipboard.writeText(text).then(() => {
+    copyBtn.textContent = "Copied!";
+    copyBtn.classList.add("ok");
+    setTimeout(() => { copyBtn.textContent = "Copy"; copyBtn.classList.remove("ok"); }, 1800);
+  });
+});
+
+clearBtn.addEventListener("click", () => {
+  selectedFiles = [];
+  fileInput.value = "";
+  previewsEl.innerHTML = "";
+  outputEl.textContent = "";
+  logEl.textContent = "";
+  outputCard.style.display = "none";
+  progressWrap.style.display = "none";
+  progressBar.style.width = "0%";
+  copyBtn.disabled = true;
+  updateRunBtn();
+});
+</script>
+</body>
+</html>
