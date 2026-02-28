@@ -352,9 +352,9 @@ runBtn.addEventListener("click", async () => {
 });
 
 copyBtn.addEventListener("click", () => {
-  const container = document.getElementById("output");
-  const header = container.querySelector(".target-header")?.textContent || "";
-  const names = [...container.querySelectorAll(".name-list li")].map(li => li.textContent);
+  const out = document.getElementById("output");
+  const header = out.querySelector(".target-header")?.textContent || "";
+  const names = [...out.querySelectorAll(".name-list li")].map(li => li.textContent);
   const text = [header, ...names].join("\n").trim();
   if (!text) return;
   navigator.clipboard.writeText(text).then(() => {
